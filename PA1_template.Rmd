@@ -51,6 +51,9 @@ Maximum steps is in the interval value of `r Max_steps`
 missing_data <- is.na(activity_data)
 sum_na_data <- sum(missing_data)
 
+print(missing_data)
+print(sum_na_data)
+
 # Function for completing NA step values from interval means
 data_fill <- function(data_set){
         for(i in seq_along(data_set[,1])){
