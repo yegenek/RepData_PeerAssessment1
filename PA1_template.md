@@ -10,28 +10,9 @@ output:
 ## Loading and preprocessing the data
 
 ```r
-activity_data <- read.csv("../dataset/activity.csv")
+activity_data <- read.csv("activity.csv")
 activity_data$date <- as.POSIXct(strptime(activity_data$date,"%Y-%m-%d"))
 activity_data$date <- as.Date(activity_data$date)
-```
-
-
-## What is mean total number of steps taken per day?
-
-```r
-mean_steps <- mean(activity_data$steps,na.rm = TRUE)
-print(mean_steps)
-```
-
-```
-## [1] 37.3826
-```
-
-Mean total number of steps are 37.3825996
-
-## What is the average daily activity pattern?
-
-```r
 library(tidyverse)
 ```
 
@@ -52,7 +33,38 @@ library(tidyverse)
 ## x dplyr::lag()    masks stats::lag()
 ```
 
+
+## What is mean total number of steps taken per day?
+
 ```r
+total_steps <- aggregate(activity_data$steps,by = list(Category = activity_data$date),FUN = sum)
+
+hist(total_steps$x,xlab = "Total Steps Per Day", ylab = "Frequency", main = "Histogram of total steps")
+```
+
+![](PA1_template_files/figure-html/total_steps-1.png)<!-- -->
+
+```r
+print(mean(total_steps$x,na.rm = TRUE))
+```
+
+```
+## [1] 10766.19
+```
+
+```r
+print(median(total_steps$x,na.rm = TRUE))
+```
+
+```
+## [1] 10765
+```
+
+
+## What is the average daily activity pattern?
+
+```r
+library(tidyverse)
 complete_data <- na.omit(activity_data)
 daily_steps <- tapply(complete_data$steps, complete_data$interval, mean)
 intervals <- as.integer(names(daily_steps))
@@ -81,7 +93,16 @@ Maximum steps is in the interval value of 835
 missing_data <- is.na(activity_data)
 sum_na_data <- sum(missing_data)
 
-# Function for completing NA step values from interval means
+
+print(sum_na_data)
+```
+
+```
+## [1] 2304
+```
+
+```r
+# Function for replacing NA step values from same interval means, 
 data_fill <- function(data_set){
         for(i in seq_along(data_set[,1])){
                 index = data_set[i,3]
@@ -92,21 +113,51 @@ return(data_set)
 
 filled_data <- data_fill(activity_data)
 
-hist(filled_data$steps,xlab = "Total Steps", main = "Histogram of Total Steps per Day")
+filled_steps <- aggregate(filled_data$steps,by = list(Category = activity_data$date),FUN = sum)
+
+hist(filled_steps$x,xlab = "Total Steps Per Day", ylab = "Frequency", main = "Histogram of total steps for filled data")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
 
 ```r
-mean_fill <- mean(filled_data$steps)
-median_fill <- median(filled_data$steps)
+print(mean(filled_steps$x,na.rm = TRUE))
+```
+
+```
+## [1] 10766.19
+```
+
+```r
+print(median(filled_steps$x,na.rm = TRUE))
+```
+
+```
+## [1] 10766.19
 ```
 
 ### Mean and Median Values for Steps
-Mean steps for the completed activity data is 37.3825996.
 
-Median steps for the completed activity data is 0.
 
+```r
+#Mean
+print(mean(filled_steps$x,na.rm = TRUE))
+```
+
+```
+## [1] 10766.19
+```
+
+```r
+#Median
+print(median(filled_steps$x,na.rm = TRUE))
+```
+
+```
+## [1] 10766.19
+```
+
+Filling missing data with interval means did not have much effect on the distribution of the data as the mean and median stayed practically the same.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -161,6 +212,10 @@ ggplot(mean_activity,aes(interval,means_Steps)) +
 ## `value` arguments are now deprecated. See labellers documentation.
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+On general looks like weekends has higher activity than weekdays. 
+
+Especially, the plots of weekday and weekend activity hints that at the weekends late day activity is more prominent compared to weekday late day activities. 
 
 

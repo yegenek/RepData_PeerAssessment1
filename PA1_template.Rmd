@@ -1,28 +1,33 @@
 ---
 title: 'Reproducible Research: Peer Assessment 1'
 output:
+  pdf_document: default
   html_document:
     keep_md: yes
-  pdf_document: default
 ---
 
 
 ## Loading and preprocessing the data
 ```{r read data, echo=TRUE}
-activity_data <- read.csv("../dataset/activity.csv")
+activity_data <- read.csv("activity.csv")
 activity_data$date <- as.POSIXct(strptime(activity_data$date,"%Y-%m-%d"))
 activity_data$date <- as.Date(activity_data$date)
+library(tidyverse)
 
 ```
 
 
 ## What is mean total number of steps taken per day?
-```{r mean_steps,echo=TRUE}
-mean_steps <- mean(activity_data$steps,na.rm = TRUE)
-print(mean_steps)
+```{r total_steps,echo=TRUE}
+
+total_steps <- aggregate(activity_data$steps,by = list(Category = activity_data$date),FUN = sum)
+
+hist(total_steps$x,xlab = "Total Steps Per Day", ylab = "Frequency", main = "Histogram of total steps")
+
+print(mean(total_steps$x,na.rm = TRUE))
+print(median(total_steps$x,na.rm = TRUE))
 ```
 
-Mean total number of steps are `r mean_steps`
 
 ## What is the average daily activity pattern?
 ```{r activity_pattern,echo=TRUE}
@@ -51,10 +56,10 @@ Maximum steps is in the interval value of `r Max_steps`
 missing_data <- is.na(activity_data)
 sum_na_data <- sum(missing_data)
 
-print(missing_data)
+
 print(sum_na_data)
 
-# Function for completing NA step values from interval means
+# Function for replacing NA step values from same interval means, 
 data_fill <- function(data_set){
         for(i in seq_along(data_set[,1])){
                 index = data_set[i,3]
@@ -65,17 +70,25 @@ return(data_set)
 
 filled_data <- data_fill(activity_data)
 
-hist(filled_data$steps,xlab = "Total Steps", main = "Histogram of Total Steps per Day")
+filled_steps <- aggregate(filled_data$steps,by = list(Category = activity_data$date),FUN = sum)
 
-mean_fill <- mean(filled_data$steps)
-median_fill <- median(filled_data$steps)
+hist(filled_steps$x,xlab = "Total Steps Per Day", ylab = "Frequency", main = "Histogram of total steps for filled data")
+
+print(mean(filled_steps$x,na.rm = TRUE))
+print(median(filled_steps$x,na.rm = TRUE))
+
 ```
 
 ### Mean and Median Values for Steps
-Mean steps for the completed activity data is `r mean_fill`.
 
-Median steps for the completed activity data is `r median_fill`.
+```{r}
+#Mean
+print(mean(filled_steps$x,na.rm = TRUE))
+#Median
+print(median(filled_steps$x,na.rm = TRUE))
+```
 
+Filling missing data with interval means did not have much effect on the distribution of the data as the mean and median stayed practically the same.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
@@ -108,5 +121,9 @@ ggplot(mean_activity,aes(interval,means_Steps)) +
 
         
 ```
+
+On general looks like weekends has higher activity than weekdays. 
+
+Especially, the plots of weekday and weekend activity hints that at the weekends late day activity is more prominent compared to weekday late day activities. 
 
 
