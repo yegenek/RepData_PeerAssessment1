@@ -92,7 +92,7 @@ return(data_set)
 
 filled_data <- data_fill(activity_data)
 
-hist(filled_data$steps)
+hist(filled_data$steps,xlab = "Total Steps", main = "Histogram of Total Steps per Day")
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
